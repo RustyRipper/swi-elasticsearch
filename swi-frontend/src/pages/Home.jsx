@@ -32,23 +32,26 @@ useEffect(() => {
   };
 
   const fetchSongs = async (customFilters = filters) => {
+    const cf = { ...customFilters };
+    if (cf.artist && cf.artist.trim().includes(" ")) {
+      cf.query = cf.artist.trim();
+      cf.artist = "";               
+    }
     const filteredParams = Object.fromEntries(
-      Object.entries(customFilters)
+      Object.entries(cf)
         .filter(([_, value]) => value !== "")
         .map(([key, value]) => [
           key,
           key === "artist" ? value.toLowerCase() : value,
         ])
     );
-    console.log("filters:", filteredParams);
 
     const params = new URLSearchParams(filteredParams).toString();
-    console.log(params);
     const res = await fetch(`http://localhost:8080/api/songs/search?${params}`);
     const data = await res.json();
-    console.log(data);
     setResults(data);
   };
+
 
   return (
     <div
