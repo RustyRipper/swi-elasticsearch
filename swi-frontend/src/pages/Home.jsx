@@ -1,18 +1,52 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 function Home({ filters, setFilters, results, setResults }) {
+  const location = useLocation();
+
+useEffect(() => {
+  if (location.state?.artist) {
+    const artistName = location.state.artist;
+
+    const newFilters = {
+      query: "",
+      artist: artistName,
+      language: "",
+      yearFrom: "",
+      yearTo: "",
+      sortBy: "",
+    };
+
+    setFilters(newFilters);
+    fetchSongs(newFilters);
+
+    // Wyczyść state (zastąp bieżący wpis w historii)
+    window.history.replaceState({}, document.title);
+  }
+}, [location.state]);
+
+
+
   const handleChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  const fetchSongs = async () => {
+  const fetchSongs = async (customFilters = filters) => {
     const filteredParams = Object.fromEntries(
-      Object.entries(filters).filter(([_, value]) => value !== "")
+      Object.entries(customFilters)
+        .filter(([_, value]) => value !== "")
+        .map(([key, value]) => [
+          key,
+          key === "artist" ? value.toLowerCase() : value,
+        ])
     );
+    console.log("filters:", filteredParams);
+
     const params = new URLSearchParams(filteredParams).toString();
+    console.log(params);
     const res = await fetch(`http://localhost:8080/api/songs/search?${params}`);
     const data = await res.json();
+    console.log(data);
     setResults(data);
   };
 
@@ -62,7 +96,7 @@ function Home({ filters, setFilters, results, setResults }) {
           }}
         />
         <button
-          onClick={fetchSongs}
+          onClick={() => fetchSongs()}
           style={{
             padding: "10px 18px",
             fontSize: "16px",
@@ -278,7 +312,7 @@ function Home({ filters, setFilters, results, setResults }) {
                   <strong>Rok:</strong> {song.year || "-"}
                 </p>
                 <p>
-                <strong>Wyświetlenia:</strong> {(song.views ?? 0).toLocaleString('pl-PL')}
+                  <strong>Wyświetlenia:</strong> {(song.views ?? 0).toLocaleString("pl-PL")}
                 </p>
                 <p style={{ fontStyle: "italic", color: "#555" }}>
                   {song.lyrics

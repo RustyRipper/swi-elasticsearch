@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 
 function SongPage() {
   const location = useLocation();
@@ -67,8 +67,20 @@ function SongPage() {
         >
           <h1 style={{ marginTop: 0, marginBottom: "15px" }}>{song.title || "Brak tytułu"}</h1>
           <p style={{ margin: "6px 0" }}>
-            <strong>Wykonawca:</strong> {song.artist || "Nieznany"}
+            <strong>Wykonawca:</strong>{" "}
+            {song.artist ? (
+              <Link
+                to="/"
+                state={{ artist: song.artist }}
+                style={{ color: "#2563eb", textDecoration: "underline", cursor: "pointer" }}
+              >
+                {song.artist}
+              </Link>
+            ) : (
+              "Nieznany"
+            )}
           </p>
+
           <p style={{ margin: "6px 0" }}>
             <strong>Język:</strong> {song.language || "-"}
           </p>
